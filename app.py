@@ -4,7 +4,7 @@ import glob
 from dotenv import load_dotenv
 import openai
 from openai import OpenAI
-import pandas as pd
+# import pandas as pd # Commenté pour le moment
 from datetime import datetime
 import docx
 import base64
@@ -21,13 +21,18 @@ from streamlit_lottie import st_lottie
 from audio_recorder_streamlit import audio_recorder
 
 # === DÉBUT DEBUG SECRETS ===
-# Afficher le contenu brut des secrets au démarrage pour diagnostic
-# Ceci sera retiré une fois le problème résolu
-if hasattr(st, 'secrets'):
-    st.sidebar.subheader("Contenu brut de st.secrets:")
-    st.sidebar.json(st.secrets.to_dict()) # Convertir en dict pour affichage JSON
+if hasattr(st, 'secrets') and st.secrets:
+    st.sidebar.subheader("Contenu des Secrets Streamlit:")
+    # Itérer sur les clés du premier niveau des secrets
+    secrets_dict = {}
+    for key in st.secrets:
+        try:
+            secrets_dict[key] = st.secrets[key]
+        except Exception as e:
+            secrets_dict[key] = f"(Erreur de lecture: {str(e)})"
+    st.sidebar.json(secrets_dict)
 else:
-    st.sidebar.warning("st.secrets non disponible.")
+    st.sidebar.warning("st.secrets non disponible ou vide.")
 # === FIN DEBUG SECRETS ===
 
 # Chargement des variables d'environnement
@@ -46,27 +51,30 @@ if hasattr(st, 'secrets') and st.secrets:
         if "OPENAI_API_KEY" in st.secrets:
             OPENAI_API_KEY_FROM_ENV = st.secrets["OPENAI_API_KEY"]
             os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY_FROM_ENV
-            st.sidebar.info("Clé API OpenAI chargée depuis st.secrets (directement).")
+            # st.sidebar.info("Clé API OpenAI chargée depuis st.secrets (directement).") # Log redondant avec ci-dessus
 
-        elif "api_keys" in st.secrets and "openai" in st.secrets["api_keys"]:
+        elif "api_keys" in st.secrets and isinstance(st.secrets["api_keys"], dict) and "openai" in st.secrets["api_keys"]:
             OPENAI_API_KEY_FROM_ENV = st.secrets["api_keys"]["openai"]
             os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY_FROM_ENV
-            st.sidebar.info("Clé API OpenAI chargée depuis st.secrets (section api_keys).")
+            # st.sidebar.info("Clé API OpenAI chargée depuis st.secrets (section api_keys).")
         else:
-            st.sidebar.error("Clé API OpenAI non trouvée dans st.secrets.")
+            # Ce message d'erreur sera affiché si la clé n'est trouvée dans aucun des formats attendus
+            pass # Le log général des secrets ci-dessus devrait aider à diagnostiquer
 
-        if "app_settings" in st.secrets and "debug_mode" in st.secrets["app_settings"]:
+        # Gestion du mode debug
+        if "app_settings" in st.secrets and isinstance(st.secrets["app_settings"], dict) and "debug_mode" in st.secrets["app_settings"]:
             DEBUG_MODE_FROM_ENV = str(st.secrets["app_settings"].get("debug_mode", "false")).lower()
-            st.sidebar.info(f"Mode DEBUG chargé depuis st.secrets: {DEBUG_MODE_FROM_ENV}")
+            # st.sidebar.info(f"Mode DEBUG chargé depuis st.secrets: {DEBUG_MODE_FROM_ENV}")
         else:
-            st.sidebar.warning("Paramètre debug_mode non trouvé dans st.secrets. Utilisation de la valeur par défaut (false).")
+            # st.sidebar.warning("Paramètre debug_mode non trouvé dans st.secrets. Utilisation de la valeur par défaut (false).")
+            pass # Le log général des secrets ci-dessus devrait aider à diagnostiquer
         os.environ["DEBUG_MODE"] = DEBUG_MODE_FROM_ENV
 
     except Exception as e:
-        st.sidebar.error(f"Erreur lors de la lecture de st.secrets: {str(e)}")
+        st.sidebar.error(f"Erreur lors de la configuration des variables depuis st.secrets: {str(e)}")
 else:
     # Mode local ou variables déjà définies par .env
-    st.sidebar.info("Utilisation des variables d'environnement locales (ou .env).")
+    # st.sidebar.info("Utilisation des variables d'environnement locales (ou .env).") # Peut être redondant si le bloc secrets s'affiche
     OPENAI_API_KEY_FROM_ENV = os.getenv("OPENAI_API_KEY")
     DEBUG_MODE_FROM_ENV = os.getenv("DEBUG_MODE", "true").lower() # Par défaut à true en local
     os.environ["DEBUG_MODE"] = DEBUG_MODE_FROM_ENV
