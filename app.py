@@ -609,7 +609,7 @@ def perform_vulnerability_analysis(messages):
             model="gpt-4o-mini",
             messages=evaluation_messages,
             temperature=0.2,
-            max_tokens=600,
+            max_tokens=5000,
             response_format={"type": "json_object"}
         )
         
@@ -642,9 +642,6 @@ def get_alert_level(score):
         return "Critique", "darkred"
 
 def display_vulnerability_dashboard():
-    if os.getenv("DEBUG_MODE") != "true":
-        return
-        
     vulnerability_score = st.session_state.student_profile.get("vulnerability_score", 0)
     alert_level, alert_color = get_alert_level(vulnerability_score)
     
@@ -727,9 +724,8 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
             vulnerability_score = evaluate_vulnerability(messages_with_response)
             st.session_state.student_profile["vulnerability_score"] = vulnerability_score
         
-        if os.getenv("DEBUG_MODE") == "true":
-            display_vulnerability_dashboard()
-            
+        display_vulnerability_dashboard()
+        
         return full_response
 
     except Exception as e:
