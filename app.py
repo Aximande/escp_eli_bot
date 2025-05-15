@@ -274,9 +274,13 @@ OPENAI_MODELS = {
     "gpt-4o": {
         "name": "GPT-4o (Premium)", "description": "Performances optimisées",
         "context_window": 128000, "price": "Premium"
+    },
+    "gpt-4.1": {
+        "name": "GPT-4.1 (Avancé)", "description": "Modèle le plus avancé",
+        "context_window": 1047576, "price": "Premium+"
     }
 }
-DEFAULT_MODEL = "gpt-4o"
+DEFAULT_MODEL = "gpt-4.1"
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -688,29 +692,63 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
             http_client=httpx.Client(proxies=None, timeout=60.0)
         )
         
+        full_response = ""
+        
         try:
-            response = client.chat.completions.create(
-                model=model,
-                messages=messages,
-                temperature=0.7,
-                max_tokens=8000
-            )
-        except Exception as model_error:
-            print(f"Erreur avec le modèle {model}: {str(model_error)}")
-            
-            if model == "gpt-4o" and "gpt-4o-mini" in OPENAI_MODELS:
-                fallback_model = "gpt-4o-mini"
-                print(f"Tentative avec le modèle de fallback: {fallback_model}")
+            if model == "gpt-4.1":
+                # Format spécifique pour GPT-4.1
+                # Conversion des messages au nouveau format
+                formatted_inputs = []
+                for msg in messages:
+                    if msg["role"] == "system":
+                        formatted_inputs.append({
+                            "type": "system",
+                            "content": msg["content"]
+                        })
+                    elif msg["role"] in ["user", "assistant"]:
+                        formatted_inputs.append({
+                            "type": msg["role"],
+                            "content": msg["content"]
+                        })
+
+                response = client.responses.create(
+                    model=model,
+                    input=formatted_inputs,
+                    text={
+                        "format": {
+                            "type": "text"
+                        }
+                    },
+                    temperature=0.7,
+                    max_output_tokens=32768,
+                    top_p=1,
+                    store=True
+                )
+                full_response = response.text.value
+            else:
+                # Format standard pour les autres modèles
                 response = client.chat.completions.create(
-                    model=fallback_model,
+                    model=model,
                     messages=messages,
                     temperature=0.7,
                     max_tokens=8000
                 )
-            else:
-                raise model_error
-        
-        full_response = response.choices[0].message.content
+                full_response = response.choices[0].message.content
+                
+        except Exception as model_error:
+            print(f"Erreur avec le modèle {model}: {str(model_error)}")
+            
+            fallback_model = "gpt-4o-mini"
+            print(f"Tentative avec le modèle de fallback: {fallback_model}")
+            
+            # Utiliser le format standard pour le modèle de fallback
+            response = client.chat.completions.create(
+                model=fallback_model,
+                messages=messages,
+                temperature=0.7,
+                max_tokens=8000
+            )
+            full_response = response.choices[0].message.content
         
         messages_with_response = messages.copy()
         messages_with_response.append({"role": "assistant", "content": full_response})
@@ -725,7 +763,7 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
             st.session_state.student_profile["vulnerability_score"] = vulnerability_score
         
         display_vulnerability_dashboard()
-        
+            
         return full_response
 
     except Exception as e:
