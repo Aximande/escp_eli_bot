@@ -21,14 +21,26 @@ from streamlit_lottie import st_lottie
 from audio_recorder_streamlit import audio_recorder
 
 # Chargement des variables d'environnement
-load_dotenv()
+# En environnement local, utiliser .env
+# Sur Streamlit Cloud, utiliser les secrets
+try:
+    # Essayer de charger depuis le fichier .env (développement local)
+    load_dotenv()
+except:
+    pass
+
+# Définition des variables depuis secrets ou .env
+if "api_keys" in st.secrets:
+    # Mode Streamlit Cloud avec secrets
+    os.environ["OPENAI_API_KEY"] = st.secrets["api_keys"]["openai"]
+    os.environ["DEBUG_MODE"] = str(st.secrets["app_settings"].get("debug_mode", "false")).lower()
+else:
+    # Mode local ou variables déjà définies par .env
+    if os.getenv("DEBUG_MODE") is None:
+        os.environ["DEBUG_MODE"] = "true"
 
 # Configuration de l'API OpenAI
 # La variable d'environnement OPENAI_API_KEY sera automatiquement détectée par le client OpenAI
-
-# Définition des variables d'environnement par défaut si elles n'existent pas
-if os.getenv("DEBUG_MODE") is None:
-    os.environ["DEBUG_MODE"] = "true"
 
 # Dictionnaire de traduction pour l'internationalisation
 TRANSLATIONS = {

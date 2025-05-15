@@ -9,3 +9,4 @@ watchdog==3.0.0
 python-docx==0.8.11 
 httpx==0.25.0
 audio-recorder-streamlit==0.0.9
+streamlit-lottie==0.0.5
