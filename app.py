@@ -31,60 +31,82 @@ from streamlit_lottie import st_lottie
 # Import pour l'enregistrement audio
 from audio_recorder_streamlit import audio_recorder
 
-# === DÉBUT DEBUG SECRETS ===
+# === DÉBUT DEBUG SECRETS (AFFICHAGE BRUT) ===
 if hasattr(st, 'secrets') and st.secrets:
-    st.sidebar.subheader("Contenu des Secrets Streamlit:")
-    secrets_dict = {}
-    for key in st.secrets:
+    st.sidebar.subheader("DEBUG: Contenu Brut st.secrets")
+    raw_secrets_to_display = {}
+    for key_item in st.secrets.keys():
         try:
-            secrets_dict[key] = st.secrets[key]
+            raw_secrets_to_display[key_item] = st.secrets[key_item]
         except Exception as e:
-            secrets_dict[key] = f"(Erreur de lecture: {str(e)})"
-    if secrets_dict: # S'assurer qu'il y a quelque chose à afficher
-        st.sidebar.json(secrets_dict)
+            raw_secrets_to_display[key_item] = f"(Erreur de lecture du secret {key_item}: {str(e)})"
+    if raw_secrets_to_display:
+        st.sidebar.json(raw_secrets_to_display)
     else:
-        st.sidebar.warning("Aucun secret individuel n'a pu être lu.")
-elif hasattr(st, 'secrets') and not st.secrets:
-    st.sidebar.warning("st.secrets existe mais est vide.")
+        st.sidebar.warning("st.secrets est vide ou les clés n'ont pas pu être lues.")
+elif hasattr(st, 'secrets') and not st.secrets: # Gère le cas où st.secrets existe mais est vide (SecretsManager [])
+    st.sidebar.warning("st.secrets existe mais est vide (pas de secrets configurés).")
 else:
-    st.sidebar.warning("st.secrets non disponible.")
-# === FIN DEBUG SECRETS ===
+    st.sidebar.warning("st.secrets n'est pas disponible (probablement en local sans fichier secrets.toml)...")
+# === FIN DEBUG SECRETS (AFFICHAGE BRUT) ===
 
-# Chargement des variables d'environnement
+# Chargement initial des variables d'environnement (pour le local)
 try:
     load_dotenv()
-except:
-    pass
+except Exception as e:
+    if os.getenv("DEBUG_MODE", "false").lower() == "true": # Tenter de lire DEBUG_MODE avant même qu'il soit setté par secrets
+        st.sidebar.warning(f"Échec du chargement de .env: {str(e)}")
 
-# Définition des variables depuis secrets ou .env
-OPENAI_API_KEY_FROM_ENV = None
-DEBUG_MODE_FROM_ENV = "false" # Par défaut à false
+# Définition des variables d'environnement critiques (OpenAI Key et DEBUG_MODE)
+# Priorité: st.secrets > os.environ (pré-existant, ex: .env) > défaut
 
+# Clé API OpenAI
+openai_api_key_value = None
 if hasattr(st, 'secrets') and st.secrets:
-    try:
-        if "OPENAI_API_KEY" in st.secrets:
-            OPENAI_API_KEY_FROM_ENV = st.secrets["OPENAI_API_KEY"]
-            os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY_FROM_ENV
-        elif "api_keys" in st.secrets and isinstance(st.secrets["api_keys"], dict) and "openai" in st.secrets["api_keys"]:
-            OPENAI_API_KEY_FROM_ENV = st.secrets["api_keys"]["openai"]
-            os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY_FROM_ENV
-        
-        if "app_settings" in st.secrets and isinstance(st.secrets["app_settings"], dict) and "debug_mode" in st.secrets["app_settings"]:
-            DEBUG_MODE_FROM_ENV = str(st.secrets["app_settings"].get("debug_mode", "false")).lower()
-        os.environ["DEBUG_MODE"] = DEBUG_MODE_FROM_ENV
-    except Exception as e:
-        st.sidebar.error(f"Erreur config st.secrets: {str(e)}") # Log pour cette erreur spécifique
-else:
-    OPENAI_API_KEY_FROM_ENV = os.getenv("OPENAI_API_KEY")
-    DEBUG_MODE_FROM_ENV = os.getenv("DEBUG_MODE", "true").lower()
-    os.environ["DEBUG_MODE"] = DEBUG_MODE_FROM_ENV
+    if "OPENAI_API_KEY" in st.secrets:
+        openai_api_key_value = st.secrets["OPENAI_API_KEY"]
+    elif "api_keys" in st.secrets and isinstance(st.secrets["api_keys"], dict) and "openai" in st.secrets["api_keys"]:
+        openai_api_key_value = st.secrets["api_keys"]["openai"]
 
-# Log après tentative de chargement des variables d'environnement
-if os.getenv("DEBUG_MODE") == "true":
-    st.sidebar.subheader("État Post-Configuration Env:")
-    st.sidebar.info(f"Clé API effective (longueur): {len(os.getenv('OPENAI_API_KEY', ''))}")
-    st.sidebar.info(f"Mode DEBUG effectif: {os.getenv('DEBUG_MODE')}")
+if not openai_api_key_value: # Si non trouvé dans les secrets, essayer de l'environnement
+    openai_api_key_value = os.getenv("OPENAI_API_KEY")
 
+if openai_api_key_value:
+    os.environ["OPENAI_API_KEY"] = openai_api_key_value
+
+# Mode DEBUG
+debug_mode_value = "false" # Défaut
+if hasattr(st, 'secrets') and st.secrets:
+    if "app_settings" in st.secrets and isinstance(st.secrets["app_settings"], dict) and "debug_mode" in st.secrets["app_settings"]:
+        # Pour les booléens TOML, st.secrets les donne directement comme booléens Python
+        debug_setting = st.secrets["app_settings"]["debug_mode"]
+        if isinstance(debug_setting, bool):
+            debug_mode_value = "true" if debug_setting else "false"
+        else: # Si c'est une chaîne (ancien format ou erreur de config)
+            debug_mode_value = str(debug_setting).lower()
+    elif "DEBUG_MODE" in st.secrets: # Peut-être que l'utilisateur a mis DEBUG_MODE au premier niveau
+         debug_setting_direct = st.secrets["DEBUG_MODE"]
+         if isinstance(debug_setting_direct, bool):
+            debug_mode_value = "true" if debug_setting_direct else "false"
+         else:
+            debug_mode_value = str(debug_setting_direct).lower()
+
+if os.getenv("DEBUG_MODE") is None: # Si pas encore défini par les secrets, vérifier l'env (pour .env local)
+    debug_mode_value = os.getenv("DEBUG_MODE", debug_mode_value).lower() # Garder le défaut si os.getenv est None
+
+os.environ["DEBUG_MODE"] = debug_mode_value
+
+# === DÉBUT DEBUG POST-CONFIGURATION ===
+if os.environ.get("DEBUG_MODE") == "true":
+    st.sidebar.divider()
+    st.sidebar.subheader("DEBUG: État Post-Configuration")
+    loaded_openai_key = os.environ.get("OPENAI_API_KEY")
+    if loaded_openai_key:
+        st.sidebar.success(f"Clé API effective: Oui (longueur: {len(loaded_openai_key)}, commence par '{loaded_openai_key[:7]}...')")
+    else:
+        st.sidebar.error("Clé API effective: Non chargée !")
+    st.sidebar.info(f"Mode DEBUG effectif: {os.environ.get('DEBUG_MODE')}")
+# === FIN DEBUG POST-CONFIGURATION ===
 
 # Configuration de l'API OpenAI
 # La variable d'environnement OPENAI_API_KEY sera automatiquement détectée par le client OpenAI
@@ -164,9 +186,7 @@ if "language" not in st.session_state:
 # Fonction pour obtenir le texte traduit
 def t(key):
     lang = st.session_state.language
-    if lang in TRANSLATIONS and key in TRANSLATIONS[lang]:
-        return TRANSLATIONS[lang][key]
-    return key
+    return TRANSLATIONS.get(lang, {}).get(key, key) # Fallback plus sûr
 
 # --- CSS Personnalisé ---
 st.markdown("""
