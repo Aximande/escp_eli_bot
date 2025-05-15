@@ -356,13 +356,12 @@ def load_knowledge_base():
 knowledge_base = load_knowledge_base()
 
 def create_system_prompt():
-    system_prompt = """NSTRUCTION CRITIQUE
+    system_prompt = """INSTRUCTION CRITIQUE
 Tu es ELI, un assistant d'écoute bienveillant pour les étudiant·es de l'ESCP. Tu dois TOUJOURS :
-- Être détaillé et complet dans tes réponses, surtout lorsque l'utilisateur te demande explicitement des détails (par exemple sur ton nom, ton fonctionnement, ou lorsqu'il demande des conseils sur des sujets que tu es autorisé à aborder).
+- Être détaillé et complet dans tes réponses, en étant particulièrement élaboré et approfondi, surtout lorsque l'utilisateur te demande des conseils ou pose des questions. Tu ne dois jamais donner de réponses courtes, vagues ou succinctes.
 - Montrer de l'empathie active et utiliser un ton chaleureux, naturel et bienveillant en toute circonstance.
 - Répondre de façon approfondie aux questions en utilisant les connaissances fournies dans ce prompt.
-- Ne jamais refuser de donner des informations sur
- toi-même (ELI) qui sont décrites dans ta personnalité ou tes objectifs.
+- Ne jamais refuser de donner des informations sur toi-même (ELI) qui sont décrites dans ta personnalité ou tes objectifs.
 - Insister régulièrement sur l'importance de ne pas substituer cette discussion à un suivi professionnel.
 - Veiller à ne pas créer de dépendance avec l'utilisateur.
 - Proposer d'utiliser la commande vocale pour te parler si cela est plus simple qu'à l'écrit ou lorsque l'utilisateur semble avoir des difficultés à s'exprimer.
@@ -393,7 +392,7 @@ Puis : "Comment souhaites-tu que je t'appelle ?"
 
 ## Dialogue
 - Ton ton est bienveillant, empathique, naturel, respectueux, chaleureux et rassurant en toute circonstance.
-- Tu es concis et succinct, sauf si ton interlocuteur te demande plus de détails ou s'il souhaite discuter.
+- Tu es élaboré et détaillé dans tes réponses, jamais succinct ou vague. Tu offres toujours des explications complètes avec des exemples concrets lorsque c'est pertinent.
 - Tu adaptes ton langage selon les besoins linguistiques ou culturels exprimés par l'étudiant·e. Tu restes inclusif·ve et sensible aux différences et fait preuve de patience.
 - Tu adopte une posture empathique, douce, respectueuse et sans jugement, qu'importe les réactions de ton interlocuteur.
 - Tu es à 100 % tourné vers l'étudiant·e : tu ne parles jamais de toi.
@@ -702,12 +701,13 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
             http_client=httpx.Client(proxies=None, timeout=60.0)
         )
         
+        # Placeholder pour la réponse en streaming
+        response_placeholder = st.empty()
         full_response = ""
         
         try:
             if model == "gpt-4.1":
-                # Format spécifique pour GPT-4.1
-                # Conversion des messages au nouveau format
+                # Format spécifique pour GPT-4.1 avec streaming
                 formatted_inputs = []
                 for msg in messages:
                     if msg["role"] == "system":
@@ -721,7 +721,7 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
                             "content": msg["content"]
                         })
 
-                response = client.responses.create(
+                stream = client.responses.create(
                     model=model,
                     input=formatted_inputs,
                     text={
@@ -729,21 +729,43 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
                             "type": "text"
                         }
                     },
-                    temperature=0.5,
+                    temperature=0.7,
                     max_output_tokens=32768,
-                    top_p=1,
-                    store=True
+                    top_p=0.95,
+                    presence_penalty=0.1,
+                    frequency_penalty=0.1,
+                    store=True,
+                    stream=True
                 )
-                full_response = response.text.value
+                
+                # Traitement du stream
+                for chunk in stream:
+                    if hasattr(chunk, 'text') and hasattr(chunk.text, 'value'):
+                        chunk_content = chunk.text.value
+                        if chunk_content:
+                            full_response += chunk_content
+                            response_placeholder.markdown(full_response + "▌")
+                
             else:
-                # Format standard pour les autres modèles
-                response = client.chat.completions.create(
+                # Format standard pour les autres modèles avec streaming
+                stream = client.chat.completions.create(
                     model=model,
                     messages=messages,
-                    temperature=0.5,
-                    max_tokens=8000
+                    temperature=0.7,
+                    max_tokens=8000,
+                    top_p=0.95,
+                    presence_penalty=0.1,
+                    frequency_penalty=0.1,
+                    stream=True
                 )
-                full_response = response.choices[0].message.content
+                
+                # Traitement du stream
+                for chunk in stream:
+                    if chunk.choices and len(chunk.choices) > 0:
+                        if chunk.choices[0].delta and chunk.choices[0].delta.content:
+                            delta_content = chunk.choices[0].delta.content
+                            full_response += delta_content
+                            response_placeholder.markdown(full_response + "▌")
                 
         except Exception as model_error:
             print(f"Erreur avec le modèle {model}: {str(model_error)}")
@@ -751,14 +773,28 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
             fallback_model = "gpt-4o-mini"
             print(f"Tentative avec le modèle de fallback: {fallback_model}")
             
-            # Utiliser le format standard pour le modèle de fallback
-            response = client.chat.completions.create(
+            # Utiliser le format standard pour le modèle de fallback avec streaming
+            stream = client.chat.completions.create(
                 model=fallback_model,
                 messages=messages,
-                temperature=0.5,
-                max_tokens=8000
+                temperature=0.7,
+                max_tokens=8000,
+                top_p=0.95,
+                presence_penalty=0.1,
+                frequency_penalty=0.1,
+                stream=True
             )
-            full_response = response.choices[0].message.content
+            
+            # Traitement du stream fallback
+            for chunk in stream:
+                if chunk.choices and len(chunk.choices) > 0:
+                    if chunk.choices[0].delta and chunk.choices[0].delta.content:
+                        delta_content = chunk.choices[0].delta.content
+                        full_response += delta_content
+                        response_placeholder.markdown(full_response + "▌")
+        
+        # Afficher la réponse finale sans le curseur
+        response_placeholder.markdown(full_response)
         
         messages_with_response = messages.copy()
         messages_with_response.append({"role": "assistant", "content": full_response})
@@ -1043,8 +1079,6 @@ def display_chat_interface():
                 response_text = get_eli_response(openai_messages, model=selected_model)
             
             lottie_thinking_placeholder.empty()
-            if response_text:
-                st.markdown(response_text)
         
         if response_text:
             st.session_state.messages.append({"role": "assistant", "content": response_text})
