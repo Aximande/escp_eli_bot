@@ -30,10 +30,23 @@ except:
     pass
 
 # Définition des variables depuis secrets ou .env
-if "api_keys" in st.secrets:
+if st.secrets:
     # Mode Streamlit Cloud avec secrets
-    os.environ["OPENAI_API_KEY"] = st.secrets["api_keys"]["openai"]
-    os.environ["DEBUG_MODE"] = str(st.secrets["app_settings"].get("debug_mode", "false")).lower()
+    try:
+        # Vérifier si la clé est directement dans les secrets (format utilisateur)
+        if "OPENAI_API_KEY" in st.secrets:
+            os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+        # Sinon vérifier le format structuré (notre format recommandé)
+        elif "api_keys" in st.secrets and "openai" in st.secrets["api_keys"]:
+            os.environ["OPENAI_API_KEY"] = st.secrets["api_keys"]["openai"]
+        
+        # Réglage du mode debug
+        if "app_settings" in st.secrets and "debug_mode" in st.secrets["app_settings"]:
+            os.environ["DEBUG_MODE"] = str(st.secrets["app_settings"].get("debug_mode", "false")).lower()
+        else:
+            os.environ["DEBUG_MODE"] = "false"  # Par défaut en production
+    except Exception as e:
+        print(f"Erreur lors de la configuration des secrets: {str(e)}")
 else:
     # Mode local ou variables déjà définies par .env
     if os.getenv("DEBUG_MODE") is None:
@@ -537,14 +550,24 @@ def display_vulnerability_dashboard():
                 if "analyzed_message_count" in st.session_state:
                     del st.session_state.analyzed_message_count
 
-# Modifier la fonction get_eli_response pour éviter les recalculs inutiles
+# Modifier la fonction get_eli_response pour avoir plus de détails sur les erreurs
 def get_eli_response(messages, model=DEFAULT_MODEL):
     try:
         # Création explicite d'un client httpx pour contrôler les proxies
-        custom_httpx_client = httpx.Client(proxies=None) # Désactive les proxies pour ce client
+        custom_httpx_client = httpx.Client(proxies=None, timeout=60.0) # Augmentation du timeout
         
+        # Vérification de la clé API avant d'appeler OpenAI
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key or api_key == "sk-votrecleopenaiici":
+            return "Erreur de configuration: Clé API OpenAI non configurée. Veuillez configurer les secrets dans Streamlit Cloud."
+        
+        # Log pour le diagnostic
+        if os.getenv("DEBUG_MODE") == "true":
+            print(f"Modèle utilisé: {model}")
+            print(f"Nombre de messages: {len(messages)}")
+            
         # Utilisation de l'API OpenAI avec la nouvelle syntaxe (>=1.0.0) et le client httpx personnalisé
-        client = OpenAI(http_client=custom_httpx_client) 
+        client = OpenAI(api_key=api_key, http_client=custom_httpx_client) 
         
         response = client.chat.completions.create(
             model=model,
@@ -577,8 +600,20 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
         return full_response
         
     except Exception as e:
-        st.error(f"Erreur OpenAI: {str(e)}")
-        return "Désolé, une erreur technique est survenue."
+        # Afficher l'erreur pour le débogage
+        error_msg = f"Erreur détaillée: {str(e)}, Type: {type(e).__name__}"
+        print(error_msg)
+        
+        # Informations de débogage plus détaillées
+        print(f"API Key définie: {'Oui' if os.getenv('OPENAI_API_KEY') else 'Non'}")
+        print(f"Modèle demandé: {model}")
+        
+        if hasattr(e, "__traceback__"):
+            import traceback
+            traceback_str = ''.join(traceback.format_tb(e.__traceback__))
+            print(f"Traceback: {traceback_str}")
+        
+        return "Désolé, une erreur technique est survenue. L'équipe technique a été notifiée."
 
 # Ajouter l'initialisation des variables de session pour l'analyse
 if "vulnerability_analysis" not in st.session_state:
