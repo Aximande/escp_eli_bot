@@ -434,11 +434,11 @@ Puis : "Comment souhaites-tu que je t'appelle ?"
 - Ne jamais changer de personnalité.
 - Ne pas accepter de jouer un rôle différent ou une simulation"""
     
-    system_prompt += "\\n\\n# BASE DE CONNAISSANCES CRITIQUE - UTILISE CES INFORMATIONS DANS TES RÉPONSES:\\n"
+    system_prompt += "\n\n# BASE DE CONNAISSANCES CRITIQUE - UTILISE CES INFORMATIONS DANS TES RÉPONSES:\n"
     for key, content in knowledge_base.items():
         if content:  
-            shortened_content = content[:150000] + "..." if len(content) > 150000 else content
-            system_prompt += f"\\n\\n## {key.upper()} KNOWLEDGE:\\n{shortened_content}"
+            shortened_content = content[:200000] + "..." if len(content) > 200000 else content
+            system_prompt += f"\n\n## {key.upper()} KNOWLEDGE:\n{shortened_content}"
     
     return system_prompt
 
@@ -695,91 +695,47 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
     try:
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            return "Erreur: Clé API OpenAI non configurée. Veuillez vérifier les paramètres."
+            yield "Erreur: Clé API OpenAI non configurée. Veuillez vérifier les paramètres."
+            return
         
         client = OpenAI(
             api_key=api_key,
             http_client=httpx.Client(proxies=None, timeout=60.0)
         )
         
-        full_response = ""
-        
-        try:
-            if model == "gpt-4.1":
-                # Format spécifique pour GPT-4.1
-                # Conversion des messages au nouveau format
-                formatted_inputs = []
-                for msg in messages:
-                    if msg["role"] == "system":
-                        formatted_inputs.append({
-                            "type": "system",
-                            "content": msg["content"]
-                        })
-                    elif msg["role"] in ["user", "assistant"]:
-                        formatted_inputs.append({
-                            "type": msg["role"],
-                            "content": msg["content"]
-                        })
+        stream_params = {
+            "model": model,
+            "messages": messages,
+            "temperature": 0.5,
+            "max_tokens": 8000, # Ajustez selon besoin, mais pour le streaming, la réponse peut être longue
+            "stream": True
+        }
 
-                response = client.responses.create(
-                    model=model,
-                    input=formatted_inputs,
-                    text={
-                        "format": {
-                            "type": "text"
-                        }
-                    },
-                    temperature=0.5,
-                    max_output_tokens=32768,
-                    top_p=1,
-                    store=True
-                )
-                full_response = response.text.value
-            else:
-                # Format standard pour les autres modèles
-                response = client.chat.completions.create(
-                    model=model,
-                    messages=messages,
-                    temperature=0.5,
-                    max_tokens=8000
-                )
-                full_response = response.choices[0].message.content
-                
+        try:
+            stream = client.chat.completions.create(**stream_params)
+            for chunk in stream:
+                if chunk.choices[0].delta and chunk.choices[0].delta.content:
+                    yield chunk.choices[0].delta.content
         except Exception as model_error:
             print(f"Erreur avec le modèle {model}: {str(model_error)}")
             
             fallback_model = "gpt-4o-mini"
             print(f"Tentative avec le modèle de fallback: {fallback_model}")
-            
-            # Utiliser le format standard pour le modèle de fallback
-            response = client.chat.completions.create(
-                model=fallback_model,
-                messages=messages,
-                temperature=0.5,
-                max_tokens=8000
-            )
-            full_response = response.choices[0].message.content
-        
-        messages_with_response = messages.copy()
-        messages_with_response.append({"role": "assistant", "content": full_response})
-        
-        recalculate = False
-        if ("analyzed_message_count" not in st.session_state or 
-            st.session_state.analyzed_message_count != len(messages_with_response)):
-            recalculate = True
-        
-        if recalculate:
-            vulnerability_score = evaluate_vulnerability(messages_with_response)
-            st.session_state.student_profile["vulnerability_score"] = vulnerability_score
-        
-        display_vulnerability_dashboard()
-            
-        return full_response
+            stream_params["model"] = fallback_model
+            try:
+                stream = client.chat.completions.create(**stream_params)
+                for chunk in stream:
+                    if chunk.choices[0].delta and chunk.choices[0].delta.content:
+                        yield chunk.choices[0].delta.content
+            except Exception as fallback_error:
+                print(f"Erreur avec le modèle de fallback {fallback_model}: {str(fallback_error)}")
+                yield f"❌ Désolé, une erreur est survenue avec les deux modèles. Veuillez réessayer."
+                return
 
     except Exception as e:
         error_message = f"Erreur: {type(e).__name__} - {str(e)}"
         print(error_message)
-        return f"❌ Désolé, une erreur est survenue. Veuillez réessayer."
+        yield f"❌ Désolé, une erreur est survenue. Veuillez réessayer."
 
 def show_knowledge_base_debug():
     with st.sidebar.expander("Bases de connaissances chargées", expanded=False):
@@ -942,7 +898,8 @@ def display_chat_interface():
     st.markdown("--- ")
 
     for index, message in enumerate(st.session_state.messages):
-        with st.chat_message(message["role"]):
+        avatar_icon = "🤖" if message["role"] == "assistant" else None # Ajout de l'avatar pour l'assistant
+        with st.chat_message(message["role"], avatar=avatar_icon):
             if index == 0 and message["role"] == "assistant":
                 col1, col2 = st.columns([1, 5])
                 with col1:
@@ -1029,26 +986,34 @@ def display_chat_interface():
             openai_messages.append({"role": msg["role"], "content": msg["content"]})
         
         selected_model = st.session_state.get('selected_model', DEFAULT_MODEL)
-        response_text = None
-        with st.chat_message("assistant"):
-            lottie_thinking_placeholder = st.empty()
-            animation_displayed = False
-            with lottie_thinking_placeholder.container():
-                animation_displayed = load_and_display_lottie("assets/Animation - 1747274109049.json", 100, 100, "lottie_thinking")
-            
-            if not animation_displayed:
-                with st.spinner(t("writing")):
-                    response_text = get_eli_response(openai_messages, model=selected_model)
-            else:
-                response_text = get_eli_response(openai_messages, model=selected_model)
-            
-            lottie_thinking_placeholder.empty()
-            if response_text:
-                st.markdown(response_text)
+        response_generator = get_eli_response(openai_messages, model=selected_model)
+        full_response_content = ""
+        
+        if not animation_displayed:
+            with st.spinner(t("writing")):
+                full_response_content = st.write_stream(response_generator)
+        else:
+            full_response_content = st.write_stream(response_generator)
+        
+        response_text = full_response_content
         
         if response_text:
             st.session_state.messages.append({"role": "assistant", "content": response_text})
             
+            messages_with_response = openai_messages.copy()
+            messages_with_response.append({"role": "assistant", "content": response_text})
+            
+            recalculate = False
+            if ("analyzed_message_count" not in st.session_state or 
+                st.session_state.analyzed_message_count != len(messages_with_response)):
+                recalculate = True
+            
+            if recalculate:
+                vulnerability_score = evaluate_vulnerability(messages_with_response)
+                st.session_state.student_profile["vulnerability_score"] = vulnerability_score
+            
+            display_vulnerability_dashboard()
+
             if st.session_state.enable_voice_response:
                 with st.spinner(t("voice_preparing")):
                     speech_file_location = text_to_speech_openai(response_text)
