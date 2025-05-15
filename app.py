@@ -1161,7 +1161,13 @@ def display_chat_interface():
                 save_conversation(st.session_state.messages, st.session_state.student_profile)
             
             # Rerun pour afficher la réponse et l'audio
-            st.rerun()
+            # st.rerun() # COMMENTÉ TEMPORAIREMENT POUR DÉBOGAGE
+            # Si cela est commenté, l'interface ne se mettra pas à jour automatiquement
+            # après la réponse de l'assistant. Il faudra peut-être une interaction manuelle
+            # (comme redimensionner la fenêtre ou cliquer sur un autre élément) pour forcer un rafraîchissement.
+            # L'objectif est de voir si ce rerun est la cause du comportement instable.
+            if os.getenv("DEBUG_MODE") == "true":
+                st.sidebar.warning("st.rerun() après réponse de l'assistant est commenté pour débogage.")
 
     # --- Footer pour l'interface de chat ---
     st.markdown("--- ")
