@@ -40,11 +40,8 @@ if st.secrets:
         elif "api_keys" in st.secrets and "openai" in st.secrets["api_keys"]:
             os.environ["OPENAI_API_KEY"] = st.secrets["api_keys"]["openai"]
         
-        # Réglage du mode debug
-        if "app_settings" in st.secrets and "debug_mode" in st.secrets["app_settings"]:
-            os.environ["DEBUG_MODE"] = str(st.secrets["app_settings"].get("debug_mode", "false")).lower()
-        else:
-            os.environ["DEBUG_MODE"] = "false"  # Par défaut en production
+        # FORCER le mode debug à true pour diagnostiquer les problèmes actuels
+        os.environ["DEBUG_MODE"] = "true"
     except Exception as e:
         print(f"Erreur lors de la configuration des secrets: {str(e)}")
 else:
@@ -552,17 +549,24 @@ def display_vulnerability_dashboard():
 
 # Modifier la fonction get_eli_response pour ajouter un système de fallback et plus de logs
 def get_eli_response(messages, model=DEFAULT_MODEL):
-    # Afficher le modèle utilisé (visible pour l'utilisateur)
-    model_info = f"Modèle utilisé: {OPENAI_MODELS.get(model, {}).get('name', model)}"
+    # Créer une section de logs dans la sidebar qui sera toujours visible
     if os.getenv("DEBUG_MODE") == "true":
-        st.sidebar.info(model_info)
-    
-    # Log dans l'interface utilisateur (toujours visible en cas d'erreur)
-    log_container = None
-    if os.getenv("DEBUG_MODE") == "true":
-        log_container = st.empty()
-        with log_container.container():
-            st.write("Démarrage de l'appel API...")
+        st.sidebar.divider()
+        st.sidebar.subheader("Logs de débogage")
+        debug_expander = st.sidebar.expander("Voir les logs techniques", expanded=True)
+        with debug_expander:
+            st.write(f"**Modèle utilisé:** {OPENAI_MODELS.get(model, {}).get('name', model)}")
+            st.write(f"**API Key configurée:** {'Oui' if os.getenv('OPENAI_API_KEY') else 'Non'}")
+            st.write(f"**Longueur de la clé API:** {len(os.getenv('OPENAI_API_KEY', ''))}")
+            st.write(f"**Mode DEBUG:** {os.getenv('DEBUG_MODE')}")
+            
+            # Conteneur pour les logs en temps réel
+            log_area = st.empty()
+            with log_area.container():
+                st.info("Prêt à appeler l'API...")
+    else:
+        debug_expander = None
+        log_area = None
     
     try:
         # Création explicite d'un client httpx pour contrôler les proxies
@@ -572,23 +576,36 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             error_msg = "Erreur de configuration: Clé API OpenAI non configurée."
-            if log_container:
-                with log_container.container():
+            if log_area:
+                with log_area.container():
                     st.error(error_msg)
             return error_msg
             
         # Afficher un log plus détaillé
-        if log_container:
-            with log_container.container():
-                st.write(f"Appel API avec modèle: {model}")
-                st.write(f"Nombre de messages: {len(messages)}")
-                st.write(f"API Key définie: {bool(api_key)}")
+        if log_area:
+            with log_area.container():
+                st.info(f"Appel API avec modèle: {model}")
+                st.info(f"Nombre de messages: {len(messages)}")
+                st.info(f"Premier caractère de l'API Key: {api_key[0] if api_key else 'N/A'}")
+                st.info(f"Dernier caractère de l'API Key: {api_key[-1] if api_key else 'N/A'}")
             
         # Utilisation de l'API OpenAI avec la nouvelle syntaxe (>=1.0.0) et le client httpx personnalisé
         client = OpenAI(api_key=api_key, http_client=custom_httpx_client) 
         
+        # Afficher le dernier message de l'utilisateur pour déboguer
+        if log_area and messages:
+            user_messages = [msg for msg in messages if msg["role"] == "user"]
+            if user_messages:
+                last_user_msg = user_messages[-1]["content"]
+                with log_area.container():
+                    st.info(f"Dernier message utilisateur: {last_user_msg[:50]}...")
+        
         try:
             # Tentative avec le modèle sélectionné
+            if log_area:
+                with log_area.container():
+                    st.warning(f"Tentative avec le modèle {model}...")
+                    
             response = client.chat.completions.create(
                 model=model,
                 messages=messages,
@@ -599,8 +616,8 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
             # Si le modèle principal échoue, essayer un fallback
             if model == "gpt-4o" and "gpt-4o-mini" in OPENAI_MODELS:
                 fallback_model = "gpt-4o-mini"
-                if log_container:
-                    with log_container.container():
+                if log_area:
+                    with log_area.container():
                         st.warning(f"Erreur avec {model}, fallback vers {fallback_model}: {str(model_error)}")
                 
                 response = client.chat.completions.create(
@@ -615,10 +632,6 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
         
         # Récupération et traitement de la réponse
         full_response = response.choices[0].message.content
-        
-        # Effacer le conteneur de log en cas de succès
-        if log_container:
-            log_container.empty()
         
         # Mise à jour du profil étudiant avec le score de vulnérabilité
         messages_with_response = messages.copy()
@@ -638,6 +651,10 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
         if os.getenv("DEBUG_MODE") == "true":
             display_vulnerability_dashboard()
         
+        if log_area:
+            with log_area.container():
+                st.success("Réponse générée avec succès!")
+        
         return full_response
         
     except Exception as e:
@@ -645,8 +662,9 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
         error_msg = f"Erreur détaillée: {str(e)}, Type: {type(e).__name__}"
         
         # Afficher l'erreur dans l'interface si en mode debug
-        if log_container:
-            with log_container.container():
+        if log_area:
+            with log_area.container():
+                st.error("❌ ERREUR DE L'API OPENAI ❌")
                 st.error(error_msg)
                 st.error(f"API Key (longueur): {len(api_key) if api_key else 'Non définie'}")
                 st.error(f"Modèle demandé: {model}")
@@ -657,6 +675,7 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
                     st.code(traceback_str, language="python")
         
         # Également afficher dans la console pour les logs Streamlit
+        print("❌ ERREUR DE L'API OPENAI ❌")
         print(error_msg)
         print(f"API Key définie: {'Oui' if os.getenv('OPENAI_API_KEY') else 'Non'}")
         print(f"Modèle demandé: {model}")
@@ -666,7 +685,7 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
             traceback_str = ''.join(traceback.format_tb(e.__traceback__))
             print(f"Traceback: {traceback_str}")
         
-        return "Désolé, une erreur s'est produite lors de la communication avec le modèle d'IA. Veuillez réessayer ou contacter l'administrateur si le problème persiste."
+        return "❌ Erreur API: Impossible de générer une réponse. Vérifiez la section logs dans la sidebar pour plus de détails."
 
 # Ajouter l'initialisation des variables de session pour l'analyse
 if "vulnerability_analysis" not in st.session_state:
