@@ -1,0 +1,32 @@
+{
+  "timestamp": "20250515_052250",
+  "student_profile": {
+    "name": "",
+    "email": "",
+    "campus": "",
+    "vulnerability_score": 0,
+    "conversation_start": "2025-05-15T05:22:03.554752"
+  },
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Bonjour ! Je suis ELI, votre assistant d'écoute. Comment puis-je vous aider aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Hello Ellie, comment ça va ?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour ! En tant qu'assistant d'écoute, je n'ai pas d'émotions, mais je suis là pour t'écouter et te soutenir. Comment puis-je t'aider aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Je ne me sens pas très très très bien.\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Je suis désolé d'entendre que tu ne te sens pas bien. Si tu veux en parler, je suis là pour t'écouter. Peux-tu m'en dire un peu plus sur ce que tu ressens ?"
+    }
+  ]
+}

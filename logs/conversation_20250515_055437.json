@@ -1,0 +1,40 @@
+{
+  "timestamp": "20250515_055437",
+  "student_profile": {
+    "name": "",
+    "email": "",
+    "campus": "",
+    "vulnerability_score": 0,
+    "conversation_start": "2025-05-15T05:50:23.281008"
+  },
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Bonjour ! Je suis ELI, un espace d'écoute bienveillant créé pour t'accompagner. Je suis là pour t'écouter, sans jugement. Comment te sens-tu aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Eh allô, comment ça va ?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour ! Je suis ici pour toi, prêt à t'écouter. Comment te sens-tu aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Oude, c'est pas trop trop la forme, je t'avoue.\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Je suis vraiment désolé·e d'apprendre que tu ne te sens pas au mieux. Peux-tu me parler un peu plus de ce qui te pèse en ce moment ? Je suis là pour t'écouter."
+    },
+    {
+      "role": "user",
+      "content": "Mes parents ne veulent plus me parler parce que j'ai des mauvaises notes à l'école.\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Cela doit être vraiment difficile à vivre pour toi. C'est compréhensible de se sentir mal quand les relations avec les proches sont tendues, surtout pour des raisons qui te concernent directement. Veux-tu me parler un peu plus de ta situation ? Je suis là pour t'écouter et te soutenir."
+    }
+  ]
+}

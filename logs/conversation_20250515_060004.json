@@ -1,0 +1,48 @@
+{
+  "timestamp": "20250515_060004",
+  "student_profile": {
+    "name": "",
+    "email": "",
+    "campus": "",
+    "vulnerability_score": 0,
+    "conversation_start": "2025-05-15T05:57:11.908226"
+  },
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Bonjour ! Je suis ELI, un espace d'écoute bienveillant créé pour t'accompagner. Je suis là pour t'écouter, sans jugement. Comment te sens-tu aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Je ne me sens pas très bien.\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Je suis vraiment désolé d'entendre que tu ne te sens pas bien. Pourrais-tu m'en dire un peu plus sur ce que tu ressens en ce moment ?"
+    },
+    {
+      "role": "user",
+      "content": "Et toi, comment tu vas ?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Je suis ici pour toi, pour t'écouter et te soutenir. Concentrons-nous sur ce que tu traverses. Comment puis-je t'aider aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Je sais pas trop justement, je parle plus à mes parents parce que j'ai des mauvaises notes.\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Cela doit être difficile de se sentir éloigné de ses parents à cause des résultats scolaires. C'est normal de ressentir de la pression ou de la déception dans ces moments-là. Tu veux m’en dire un peu plus sur ce qui se passe et comment cela te fait ressentir ?"
+    },
+    {
+      "role": "user",
+      "content": "Ouais donc je disais j'arrête de leur parler parce que j'ai des mauvaises notes et en plus de ça je prends de la coke.\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Merci de partager cela avec moi. C'est courageux de ta part de parler de ce que tu traverses. Consommer de la cocaïne peut être un moyen de faire face au stress, mais cela peut aussi avoir des conséquences importantes sur ta santé et ton bien-être. Il est essentiel de trouver des moyens sûrs et sains pour gérer ce que tu ressens. As-tu envisagé de parler à un professionnel qui pourrait t'aider à traverser cette période difficile ? Je peux également t'aider à trouver des ressources ou des personnes à l'école qui peuvent te soutenir."
+    }
+  ]
+}

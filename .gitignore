@@ -1,0 +1,33 @@
+# Environnements virtuels
+venv/
+env/
+ENV/
+.env
+
+# Fichiers Python compilés
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Fichiers Streamlit
+.streamlit/secrets.toml
+
+# Fichiers système
+.DS_Store
+.idea/
+.vscode/
+
+# Fichiers de clés API et secrets
+*.pem
+*.key
+api_key.txt
+secrets.json
+
+# Base de données locale
+*.db
+*.sqlite 

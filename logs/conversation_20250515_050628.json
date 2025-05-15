@@ -1,0 +1,56 @@
+{
+  "timestamp": "20250515_050628",
+  "student_profile": {
+    "name": "",
+    "email": "",
+    "campus": "",
+    "vulnerability_score": 0,
+    "conversation_start": "2025-05-15T05:04:32.299769"
+  },
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Bonjour ! Je suis ELI, votre assistant d'écoute. Comment puis-je vous aider aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Hello Ellie, comment tu vas?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour ! En tant qu'assistant virtuel, je n'ai pas d'émotions, mais je suis ici pour t'aider. Que puis-je faire pour toi aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Hello Ellie, comment tu vas?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour. En tant qu'assistant virtuel, je n'ai pas de sentiments, mais je suis là pour t'écouter et t'apporter du soutien. Comment puis-je t'aider aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Hello Ellie, comment tu vas?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour ! En tant qu'assistant virtuel, je n'ai pas d'émotions, mais je suis ici pour t'aider. Comment puis-je t'aider aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Hello Ellie, comment tu vas?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour, je suis un assistant virtuel, je n'ai pas de sentiments mais je suis là pour t'aider. Comment puis-je t'aider aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Hello Ellie, comment tu vas?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour ! En tant qu'assistant virtuel, je n'ai pas d'émotions, mais je suis ici pour t'aider. Comment puis-je t'aider aujourd'hui ?"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "timestamp": "20250515_055749",
+  "student_profile": {
+    "name": "",
+    "email": "",
+    "campus": "",
+    "vulnerability_score": 0,
+    "conversation_start": "2025-05-15T05:57:11.908226"
+  },
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Bonjour ! Je suis ELI, un espace d'écoute bienveillant créé pour t'accompagner. Je suis là pour t'écouter, sans jugement. Comment te sens-tu aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Je ne me sens pas très bien.\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Je suis vraiment désolé d'entendre que tu ne te sens pas bien. Pourrais-tu m'en dire un peu plus sur ce que tu ressens en ce moment ?"
+    },
+    {
+      "role": "user",
+      "content": "Et toi, comment tu vas ?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Je suis ici pour toi, pour t'écouter et te soutenir. Concentrons-nous sur ce que tu traverses. Comment puis-je t'aider aujourd'hui ?"
+    }
+  ]
+}

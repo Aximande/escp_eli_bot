@@ -1,0 +1,28 @@
+{
+  "timestamp": "20250515_025748",
+  "student_profile": {
+    "name": "",
+    "email": "",
+    "campus": "",
+    "vulnerability_score": 0,
+    "conversation_start": "2025-05-15T02:52:06.272951"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "hello"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour. Je suis ELI, un assistant virtuel bienveillant conçu pour t'écouter dans un espace confidentiel. Je ne suis pas un professionnel de santé, mais je peux t'aider à identifier les bonnes personnes si besoin. Si je détecte une situation préoccupante, je pourrai te proposer d'alerter un référent humain, toujours avec ton accord sauf si ta sécurité est en jeu. Comment souhaites-tu que je t'appelle ?"
+    },
+    {
+      "role": "user",
+      "content": "Comment pouvez vous m'aider ?"
+    },
+    {
+      "role": "assistant",
+      "content": "Comme assistant d'écoute, je suis là pour te fournir un espace sûr et confidentiel où tu peux parler de tes préoccupations ou de tes sentiments. Je peux t'aider à naviguer à travers des moments difficiles, te fournir une écoute empathique et sans jugement, et t'orienter vers les ressources appropriées si nécessaire.\n\nJe suis également équipé pour détecter les signaux de détresse psychologique grâce à certains outils de screening validés. Si je détecte une situation qui pourrait nécessiter une intervention humaine, je peux te proposer d'alerter un référent de l'ESCP, avec ton accord, bien sûr.\n\nCependant, il est important de rappeler que je ne suis pas un professionnel de santé, et je ne peux pas remplacer un suivi thérapeutique. Si tu te sens en danger ou en détresse intense, il est crucial de contacter un professionnel de santé ou un service d'urgence.\n\nComment puis-je t'aider aujourd'hui ?"
+    }
+  ]
+}

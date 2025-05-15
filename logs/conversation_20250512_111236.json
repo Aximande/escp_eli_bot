@@ -1,0 +1,20 @@
+{
+  "timestamp": "20250512_111236",
+  "student_profile": {
+    "name": "",
+    "email": "",
+    "campus": "",
+    "vulnerability_score": 0,
+    "conversation_start": "2025-05-12T11:12:26.448664"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "hello"
+    },
+    {
+      "role": "assistant",
+      "content": "Je suis désolé, j'ai rencontré une difficulté technique. Peux-tu réessayer dans quelques instants?"
+    }
+  ]
+}

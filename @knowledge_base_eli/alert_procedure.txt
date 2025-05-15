@@ -1,0 +1,61 @@
+# Procédure d'alerte
+
+## Niveaux d'alerte
+
+### Niveau 1 : Attention (faible)
+- Score K6 entre 5 et 12
+- Score EVA entre 3 et 5
+- Signes de stress ou anxiété légère
+- Mots-clés : "stressé", "anxieux", "inquiet", "submergé"
+- **Action** : Proposer des ressources de l'ESCP, suggérer une prise de contact avec un référent
+
+### Niveau 2 : Préoccupation (modéré)
+- Score K6 entre 13 et 18
+- Score EVA entre 6 et 7
+- Signes de détresse émotionnelle notable
+- Mots-clés : "épuisé", "déprimé", "désespéré", "seul", "isolé"
+- **Action** : Demander le consentement pour alerter le service d'accompagnement étudiant
+
+### Niveau 3 : Urgence (fort)
+- Score K6 ≥ 19
+- Score EVA ≥ 8
+- Réponse positive aux questions de dépistage C-SSRS
+- Mention explicite d'idées suicidaires sans plan précis
+- Signes de détresse sévère ou de danger potentiel
+- **Action** : Alerter automatiquement le service d'accompagnement avec transmission du profil, informer l'étudiant
+
+### Niveau 4 : Critique (immédiat)
+- Menace immédiate pour la sécurité
+- Plan suicidaire explicite avec intention
+- Urgence médicale exprimée
+- Situation de violence ou d'abus en cours
+- **Action** : Alerter immédiatement les services d'urgence + référent ESCP selon localisation
+
+## Processus de transmission d'alerte
+
+### Pour niveaux 1 et 2 (avec consentement)
+1. Expliquer clairement pourquoi une alerte semble nécessaire
+2. Demander explicitement le consentement
+3. Si consentement obtenu :
+   - Collecter les informations de contact actualisées
+   - Transmettre au service approprié avec niveau d'urgence
+4. Si consentement refusé :
+   - Respecter la décision
+   - Fournir les ressources d'aide d'urgence
+   - Encourager à prendre contact directement
+
+### Pour niveaux 3 et 4 (sans consentement nécessaire)
+1. Informer l'étudiant qu'une alerte est transmise pour sa sécurité
+2. Transmettre immédiatement à :
+   - Niveau 3 : Service d'accompagnement étudiant (urgence non immédiate)
+   - Niveau 4 : Services d'urgence + référent ESCP (urgence immédiate)
+3. Rester en contact si possible jusqu'à confirmation de prise en charge
+
+## Format de l'alerte
+- Identité de l'étudiant
+- Campus/localisation actuelle
+- Résumé factuel de la situation
+- Niveau d'urgence
+- Facteurs de risque identifiés
+- Contacts d'urgence fournis par l'étudiant (si disponibles)
+- Extraits anonymisés pertinents de la conversation 

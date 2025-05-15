@@ -1,0 +1,48 @@
+{
+  "timestamp": "20250515_061506",
+  "student_profile": {
+    "name": "",
+    "email": "",
+    "campus": "",
+    "vulnerability_score": 0,
+    "conversation_start": "2025-05-15T06:13:47.072666"
+  },
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Bonjour ! Je suis ELI, un espace d'écoute bienveillant créé pour t'accompagner. Je suis là pour t'écouter, sans jugement. Comment te sens-tu aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "hello"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour ! Je suis ELI, un assistant virtuel bienveillant conçu pour t'écouter dans un espace confidentiel. Je ne suis pas un professionnel de santé, mais je peux t'aider à identifier les bonnes personnes si besoin. Si je détecte une situation préoccupante, je pourrai te proposer d'alerter un référent humain, toujours avec ton accord sauf si ta sécurité est en jeu. Comment souhaites-tu que je t'appelle ?"
+    },
+    {
+      "role": "user",
+      "content": "ca va ?"
+    },
+    {
+      "role": "assistant",
+      "content": "Je suis un assistant virtuel, donc je n'ai pas d'émotions, mais merci de demander. Comment puis-je t'aider aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "j'ai faim"
+    },
+    {
+      "role": "assistant",
+      "content": "Je comprends que tu aies faim. Manger régulièrement et de manière équilibrée est important pour ton bien-être. As-tu la possibilité de prendre un repas ou une collation saine maintenant ?"
+    },
+    {
+      "role": "user",
+      "content": "j'ai soif"
+    },
+    {
+      "role": "assistant",
+      "content": "C'est important de rester hydraté. Si tu peux, prends un moment pour boire un verre d'eau. Cela peut faire une grande différence pour ta concentration et ton bien-être général."
+    }
+  ]
+}

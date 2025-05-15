@@ -1,0 +1,32 @@
+{
+  "timestamp": "20250515_042029",
+  "student_profile": {
+    "name": "",
+    "email": "",
+    "campus": "",
+    "vulnerability_score": 0,
+    "conversation_start": "2025-05-15T04:19:46.721316"
+  },
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Bonjour ! Je suis ELI, votre assistant d'écoute. Comment puis-je vous aider aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "bjr"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour ! Comment puis-je t'aider aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "toi"
+    },
+    {
+      "role": "assistant",
+      "content": "Je suis ELI, un assistant virtuel bienveillant conçu pour t'écouter et te soutenir dans un espace confidentiel. Je suis ici pour t'offrir une première écoute empathique et bienveillante. Je ne suis pas un professionnel de santé, mais je peux t'aider à identifier les bonnes personnes si besoin. Si je détecte une situation préoccupante, je pourrai te proposer d'alerter un référent humain, toujours avec ton accord sauf si ta sécurité est en jeu. Comment souhaites-tu que je t'appelle ?"
+    }
+  ]
+}

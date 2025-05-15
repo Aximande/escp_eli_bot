@@ -1,0 +1,24 @@
+{
+  "timestamp": "20250515_053413",
+  "student_profile": {
+    "name": "",
+    "email": "",
+    "campus": "",
+    "vulnerability_score": 0,
+    "conversation_start": "2025-05-15T05:33:58.835142"
+  },
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Bonjour ! Je suis ELI, votre assistant d'écoute. Comment puis-je vous aider aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Hello, comment ça va ?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour ! En tant qu'assistant d'écoute, je suis ici pour te soutenir. Comment puis-je t'aider aujourd'hui ?"
+    }
+  ]
+}

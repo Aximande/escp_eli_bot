@@ -1,0 +1,24 @@
+{
+  "timestamp": "20250515_055053",
+  "student_profile": {
+    "name": "",
+    "email": "",
+    "campus": "",
+    "vulnerability_score": 0,
+    "conversation_start": "2025-05-15T05:50:23.281008"
+  },
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Bonjour ! Je suis ELI, un espace d'écoute bienveillant créé pour t'accompagner. Je suis là pour t'écouter, sans jugement. Comment te sens-tu aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Eh allô, comment ça va ?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour ! Je suis ici pour toi, prêt à t'écouter. Comment te sens-tu aujourd'hui ?"
+    }
+  ]
+}

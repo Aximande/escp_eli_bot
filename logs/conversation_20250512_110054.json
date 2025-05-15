@@ -1,0 +1,20 @@
+{
+  "timestamp": "20250512_110054",
+  "student_profile": {
+    "name": "",
+    "email": "",
+    "campus": "",
+    "vulnerability_score": 0,
+    "conversation_start": "2025-05-12T11:00:49.896763"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "je me sens pas bien"
+    },
+    {
+      "role": "assistant",
+      "content": "Je ne peux pas répondre pour le moment, ma configuration n'est pas complète."
+    }
+  ]
+}

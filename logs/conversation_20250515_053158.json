@@ -1,0 +1,56 @@
+{
+  "timestamp": "20250515_053158",
+  "student_profile": {
+    "name": "",
+    "email": "",
+    "campus": "",
+    "vulnerability_score": 0,
+    "conversation_start": "2025-05-15T05:29:04.355526"
+  },
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Bonjour ! Je suis ELI, votre assistant d'écoute. Comment puis-je vous aider aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Hello Elie, comment tu vas?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "En tant qu'assistant virtuel, je n'ai pas d'émotions, mais je suis ici pour toi. Comment puis-je t'aider aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Hello Ellie, comment tu vas ?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour ! En tant qu'assistant virtuel, je n'ai pas d'émotions, mais je suis là pour t'aider. Comment puis-je t'accompagner aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "Hélo, comment tu vas ?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour ! En tant qu'assistant virtuel, je n'ai pas de sentiments, mais je suis là pour toi. Que puis-je faire pour toi aujourd'hui ?"
+    },
+    {
+      "role": "user",
+      "content": "je me sens pas bien"
+    },
+    {
+      "role": "assistant",
+      "content": "Je suis désolé d'entendre que tu ne te sens pas bien. Pourrais-tu me dire un peu plus ce que tu ressens ? N'oublie pas, c'est un espace sûr et confidentiel pour s'exprimer."
+    },
+    {
+      "role": "user",
+      "content": "Hélo, comment tu vas ?\n"
+    },
+    {
+      "role": "assistant",
+      "content": "Bonjour ! En tant qu'assistant virtuel, je n'ai pas d'émotions, mais je suis là pour t'aider. Comment puis-je t'accompagner aujourd'hui ?"
+    }
+  ]
+}
