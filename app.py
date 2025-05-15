@@ -289,7 +289,7 @@ OPENAI_MODELS = {
         "context_window": 128000, "price": "Premium"
     }
 }
-DEFAULT_MODEL = "gpt-4"
+DEFAULT_MODEL = "gpt-4o"
 
 # Fonction pour extraire le texte d'un fichier DOCX
 def extract_text_from_docx(docx_path):
