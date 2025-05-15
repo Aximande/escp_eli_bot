@@ -550,34 +550,75 @@ def display_vulnerability_dashboard():
                 if "analyzed_message_count" in st.session_state:
                     del st.session_state.analyzed_message_count
 
-# Modifier la fonction get_eli_response pour avoir plus de détails sur les erreurs
+# Modifier la fonction get_eli_response pour ajouter un système de fallback et plus de logs
 def get_eli_response(messages, model=DEFAULT_MODEL):
+    # Afficher le modèle utilisé (visible pour l'utilisateur)
+    model_info = f"Modèle utilisé: {OPENAI_MODELS.get(model, {}).get('name', model)}"
+    if os.getenv("DEBUG_MODE") == "true":
+        st.sidebar.info(model_info)
+    
+    # Log dans l'interface utilisateur (toujours visible en cas d'erreur)
+    log_container = None
+    if os.getenv("DEBUG_MODE") == "true":
+        log_container = st.empty()
+        with log_container.container():
+            st.write("Démarrage de l'appel API...")
+    
     try:
         # Création explicite d'un client httpx pour contrôler les proxies
         custom_httpx_client = httpx.Client(proxies=None, timeout=60.0) # Augmentation du timeout
         
         # Vérification de la clé API avant d'appeler OpenAI
         api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key or api_key == "sk-votrecleopenaiici":
-            return "Erreur de configuration: Clé API OpenAI non configurée. Veuillez configurer les secrets dans Streamlit Cloud."
-        
-        # Log pour le diagnostic
-        if os.getenv("DEBUG_MODE") == "true":
-            print(f"Modèle utilisé: {model}")
-            print(f"Nombre de messages: {len(messages)}")
+        if not api_key:
+            error_msg = "Erreur de configuration: Clé API OpenAI non configurée."
+            if log_container:
+                with log_container.container():
+                    st.error(error_msg)
+            return error_msg
+            
+        # Afficher un log plus détaillé
+        if log_container:
+            with log_container.container():
+                st.write(f"Appel API avec modèle: {model}")
+                st.write(f"Nombre de messages: {len(messages)}")
+                st.write(f"API Key définie: {bool(api_key)}")
             
         # Utilisation de l'API OpenAI avec la nouvelle syntaxe (>=1.0.0) et le client httpx personnalisé
         client = OpenAI(api_key=api_key, http_client=custom_httpx_client) 
         
-        response = client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=0.7,
-            max_tokens=8000
-        )
+        try:
+            # Tentative avec le modèle sélectionné
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=0.7,
+                max_tokens=8000
+            )
+        except Exception as model_error:
+            # Si le modèle principal échoue, essayer un fallback
+            if model == "gpt-4o" and "gpt-4o-mini" in OPENAI_MODELS:
+                fallback_model = "gpt-4o-mini"
+                if log_container:
+                    with log_container.container():
+                        st.warning(f"Erreur avec {model}, fallback vers {fallback_model}: {str(model_error)}")
+                
+                response = client.chat.completions.create(
+                    model=fallback_model,
+                    messages=messages,
+                    temperature=0.7,
+                    max_tokens=8000
+                )
+            else:
+                # Si pas de fallback disponible, propager l'erreur
+                raise model_error
         
         # Récupération et traitement de la réponse
         full_response = response.choices[0].message.content
+        
+        # Effacer le conteneur de log en cas de succès
+        if log_container:
+            log_container.empty()
         
         # Mise à jour du profil étudiant avec le score de vulnérabilité
         messages_with_response = messages.copy()
@@ -602,9 +643,21 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
     except Exception as e:
         # Afficher l'erreur pour le débogage
         error_msg = f"Erreur détaillée: {str(e)}, Type: {type(e).__name__}"
-        print(error_msg)
         
-        # Informations de débogage plus détaillées
+        # Afficher l'erreur dans l'interface si en mode debug
+        if log_container:
+            with log_container.container():
+                st.error(error_msg)
+                st.error(f"API Key (longueur): {len(api_key) if api_key else 'Non définie'}")
+                st.error(f"Modèle demandé: {model}")
+                
+                if hasattr(e, "__traceback__"):
+                    import traceback
+                    traceback_str = ''.join(traceback.format_tb(e.__traceback__))
+                    st.code(traceback_str, language="python")
+        
+        # Également afficher dans la console pour les logs Streamlit
+        print(error_msg)
         print(f"API Key définie: {'Oui' if os.getenv('OPENAI_API_KEY') else 'Non'}")
         print(f"Modèle demandé: {model}")
         
@@ -613,7 +666,7 @@ def get_eli_response(messages, model=DEFAULT_MODEL):
             traceback_str = ''.join(traceback.format_tb(e.__traceback__))
             print(f"Traceback: {traceback_str}")
         
-        return "Désolé, une erreur technique est survenue. L'équipe technique a été notifiée."
+        return "Désolé, une erreur s'est produite lors de la communication avec le modèle d'IA. Veuillez réessayer ou contacter l'administrateur si le problème persiste."
 
 # Ajouter l'initialisation des variables de session pour l'analyse
 if "vulnerability_analysis" not in st.session_state:
